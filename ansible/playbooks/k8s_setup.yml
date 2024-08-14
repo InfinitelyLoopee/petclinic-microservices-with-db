@@ -24,9 +24,9 @@
       update_cache: yes
     vars:
       packages:
-      - apt-transport-https
-      - curl
-      - ca-certificates
+        - apt-transport-https
+        - curl
+        - ca-certificates
 
   - name: update apt-get and install kube packages
     shell: |
@@ -45,7 +45,7 @@
     service:
       name: docker
       state: restarted
-      enabled: yes
+      enabled: true
 
   # change the Docker cgroup driver by creating a configuration file `/etc/docker/daemon.json`
   # and adding the following line then restart deamon, docker and kubelet
@@ -60,14 +60,14 @@
     service:
       name: containerd
       state: restarted
-      enabled: yes
+      enabled: true
 
 
 - hosts: role_master
   tasks:
 
   - name: pull kubernetes images before installation
-    become: yes
+    become: true
     shell: kubeadm config images pull
 
   - name: initialize the Kubernetes cluster using kubeadm
@@ -79,9 +79,9 @@
     become: true
     command: "{{ item }}"
     with_items:
-     - mkdir -p /home/ubuntu/.kube
-     - cp -i /etc/kubernetes/admin.conf /home/ubuntu/.kube/config
-     - chown ubuntu:ubuntu /home/ubuntu/.kube/config
+      - mkdir -p /home/ubuntu/.kube
+      - cp -i /etc/kubernetes/admin.conf /home/ubuntu/.kube/config
+      - chown ubuntu:ubuntu /home/ubuntu/.kube/config
 
   - name: Install flannel pod network
     remote_user: ubuntu
