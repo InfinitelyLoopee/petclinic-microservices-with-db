@@ -1,4 +1,5 @@
-- hosts: all
+- name: All Hosts
+  hosts: all
   become: true
   tasks:
 
@@ -21,7 +22,7 @@
     apt:
       name: "{{ packages }}"
       state: present
-      update_cache: yes
+      update_cache: true
     vars:
       packages:
         - apt-transport-https
@@ -63,7 +64,8 @@
       enabled: true
 
 
-- hosts: role_master
+- name: Master Role Only
+  hosts: role_master
   tasks:
 
   - name: pull kubernetes images before installation
@@ -92,21 +94,23 @@
     command: kubeadm token create --print-join-command
     register: join_command_for_workers
 
-  - debug: msg='{{ join_command_for_workers.stdout.strip() }}'
+  - name: Show join command output
+    debug: msg='{{ join_command_for_workers.stdout.strip() }}'
 
-  - name: register join command for workers
+  - name: Register join command for workers
     add_host:
       name: "kube_master"
       worker_join: "{{ join_command_for_workers.stdout.strip() }}"
 
-  - name: install Helm
+  - name: Install Helm
     shell: |
       cd /home/ubuntu
       curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
       chmod 777 get_helm.sh
       ./get_helm.sh
 
-- hosts: role_worker
+- name: Role Worker Only
+  hosts: role_worker
   become: true
   tasks:
 
